@@ -105,7 +105,7 @@ class Tuner(nn.Module):
         self.pretrained_model = AutoModel.from_pretrained(pretrained_model)
     
         SCRIPT_DIR = Path(__file__).resolve().parent
-        model_PATH = SCRIPT_DIR / "/MolE_GuacaMol_27113.ckpt"
+        model_PATH = SCRIPT_DIR / "./MolE_GuacaMol_27113.ckpt"
         
         
         self.smile_model = AtomEnvEmbeddings(model_config)        
@@ -115,7 +115,7 @@ class Tuner(nn.Module):
         
         # Now load the checkpoint safely
         ckpt = torch.load(model_PATH, map_location=device, weights_only=False)
-        
+
         raw_state_dict = ckpt['models_state_dict'][0]
 
 
