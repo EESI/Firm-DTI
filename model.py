@@ -20,6 +20,7 @@ from mole.training.models.mole import AtomEnvEmbeddings
 import numpy
 from torch_geometric.data import Batch
 from torch_geometric.data import Data, Batch
+from collections import OrderedDict
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -107,7 +108,7 @@ class Tuner(nn.Module):
         model_PATH = SCRIPT_DIR / "/MolE_GuacaMol_27113.ckpt"
         
         
-        self.smile_model = AtomEnvEmbeddings(model_config.to_dict())        
+        self.smile_model = AtomEnvEmbeddings(model_config)        
         
                 
         torch.serialization.add_safe_globals([numpy.core.multiarray._reconstruct])
@@ -115,14 +116,24 @@ class Tuner(nn.Module):
         # Now load the checkpoint safely
         ckpt = torch.load(model_PATH, map_location=device, weights_only=False)
         
-        # Get the raw state_dict
         raw_state_dict = ckpt['models_state_dict'][0]
-        
-        # Add prefix if needed
-        prefixed_state_dict = { k: v for k, v in raw_state_dict.items()}
-        
+
+
+        # List any prefixes you want to remove
+        prefixes_to_remove = ("MolE.")  # add more if needed
+
+        clean_state_dict = OrderedDict()
+        for k, v in raw_state_dict.items():
+            new_k = k
+            for p in prefixes_to_remove:
+                if new_k.startswith(p):
+                    new_k = new_k[len(p):]  # strip it once
+            clean_state_dict[new_k] = v
+
+
+
         # Load into model
-        self.smile_model.load_state_dict(prefixed_state_dict, strict=False)        
+        self.smile_model.load_state_dict(clean_state_dict, strict=False)        
                 
 
         for param in self.pretrained_model.parameters():
