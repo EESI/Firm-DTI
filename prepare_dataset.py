@@ -24,7 +24,7 @@ name = benchmark['name']
 train, valid = group.get_train_valid_split(benchmark=name, split_type='default', seed=0)
 test = benchmark['test']
 
-valid_mask = train["smiles"].apply(is_kekulizable)
+valid_mask = train["Drug"].apply(is_kekulizable)
 train = train[valid_mask].reset_index(drop=True)
 
 
